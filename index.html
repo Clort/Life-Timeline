@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Life Timeline</title>
+    <style>
+        /* Default to Dark Mode */
+        :root {
+            color-scheme: dark;
+            --primary: #4A90E2;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border-color: #333;
+            --summary-color: #aaa;
+        }
+        
+        /* Light Mode Overrides */
+        body.light-mode {
+            color-scheme: light;
+            --bg-color: #f7f9fc;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+            --summary-color: #555;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        header {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .controls {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: background-color 0.3s;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="date"], input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        .secondary-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            margin-bottom: 16px;
+        }
+        
+        .secondary-btn:hover {
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .settings-panel {
+            display: none;
+            padding: 10px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 10px;
+        }
+
+        /* Category Toggles */
+        .category-toggles {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .category-toggle {
+            display: inline-block;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            user-select: none;
+            transition: all 0.2s ease;
+            margin: 0;
+            font-weight: normal;
+        }
+
+        .category-toggle input {
+            display: none; 
+        }
+
+        .category-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .action-btn {
+            display: none;
+            margin-top: 10px;
+        }
+
+        .share-btn { background-color: #28a745; }
+        .share-btn:hover { background-color: #218838; }
+
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            margin: 20px 0;
+            padding-left: 30px;
+            border-left: 3px solid var(--primary);
+        }
+
+        .timeline-item {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            opacity: 0;
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+            transition: background-color 0.3s;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -38px;
+            top: 20px;
+            width: 14px;
+            height: 14px;
+            background: var(--card-bg);
+            border: 3px solid var(--primary);
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .timeline-item.empty-year {
+            opacity: 0.7;
+        }
+
+        .timeline-item.empty-year::before {
+            border-color: var(--summary-color);
+        }
+
+        .timeline-item.empty-year .timeline-title {
+            color: var(--summary-color);
+            font-size: 1.1em;
+            font-style: italic;
+            margin: 0;
+        }
+
+        .timeline-year {
+            font-size: 0.9em;
+            color: var(--primary);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .timeline-item.empty-year .timeline-year {
+            color: var(--summary-color);
+        }
+
+        .timeline-title {
+            font-size: 1.2em;
+            margin: 0 0 8px 0;
+        }
+
+        .timeline-content {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timeline-thumbnail {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            background-color: var(--border-color);
+        }
+
+        .timeline-summary {
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: var(--summary-color);
+            margin: 0;
+        }
+
+        .explore-link {
+            display: inline-block;
+            margin-top: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .explore-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Loading Spinner */
+        .loading-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin: 30px 0;
+            color: var(--summary-color);
+            font-style: italic;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes bounceIn {
+            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+            70% { transform: translateY(-5px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>My Life Timeline</h1>
+    </header>
+
+    <div class="container">
+        <div class="controls">
+            <button class="secondary-btn" id="themeToggle">☀️ Switch to Light Mode</button>
+            
+            <label for="birthdate">When were you born?</label>
+            <input type="date" id="birthdate" required>
+
+            <button class="secondary-btn" id="toggleSettings">⚙️ Settings & Filters</button>
+            
+            <div class="settings-panel" id="settingsPanel">
+                <label>Filter by Topics (Select multiple):</label>
+                <div class="category-toggles" id="categoryToggles">
+                    <label class="category-toggle"><input type="checkbox" value="Toys OR Games OR Video Games">🧸 Toys & Games</label>
+                    <label class="category-toggle"><input type="checkbox" value="Animals OR Wildlife OR Pets">🐶 Animals</label>
+                    <label class="category-toggle"><input type="checkbox" value="Cars OR Vehicles OR Automobiles">🚗 Cars</label>
+                    <label class="category-toggle"><input type="checkbox" value="Technology OR Computers OR Inventions">💻 Tech</label>
+                    <label class="category-toggle"><input type="checkbox" value="Movies OR Music OR Pop Culture">🍿 Pop Culture</label>
+                    <label class="category-toggle"><input type="checkbox" value="Space OR Astronomy OR NASA">🚀 Space</label>
+                </div>
+
+                <label for="eventsPerYear">Events per year:</label>
+                <input type="number" id="eventsPerYear" value="1" min="1" max="5">
+            </div>
+
+            <button id="generateBtn">Generate Timeline</button>
+            <button id="shareBtn" class="action-btn share-btn">📤 Share Timeline</button>
+        </div>
+
+        <div class="loading-container" id="loadingIndicator">
+            <div class="spinner"></div>
+            <span>Searching the Wikipedia archives...</span>
+        </div>
+        
+        <div class="timeline" id="timeline"></div>
+    </div>
+
+    <script>
+        const shareBtn = document.getElementById('shareBtn');
+        const timelineContainer = document.getElementById('timeline');
+        const themeToggle = document.getElementById('themeToggle');
+
+        // Theme Toggle Logic
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeToggle.innerText = '🌙 Switch to Dark Mode';
+            } else {
+                themeToggle.innerText = '☀️ Switch to Light Mode';
+            }
+        });
+
+        // Toggle Settings Panel
+        document.getElementById('toggleSettings').addEventListener('click', () => {
+            const panel = document.getElementById('settingsPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Category Toggle UI Logic
+        document.querySelectorAll('.category-toggle input').forEach(input => {
+            input.addEventListener('change', function() {
+                if (this.checked) {
+                    this.parentElement.classList.add('active');
+                } else {
+                    this.parentElement.classList.remove('active');
+                }
+            });
+        });
+
+        // Generate Timeline Logic
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const birthdateInput = document.getElementById('birthdate').value;
+            const eventsPerYear = parseInt(document.getElementById('eventsPerYear').value) || 1;
+            const loadingIndicator = document.getElementById('loadingIndicator');
+
+            if (!birthdateInput) {
+                alert("Please enter a valid birthdate.");
+                return;
+            }
+
+            // Gather all checked category filters
+            const checkedBoxes = Array.from(document.querySelectorAll('.category-toggle input:checked'));
+            const filterValues = checkedBoxes.map(cb => cb.value);
+            // Combine them with OR (e.g., "Toys OR Space") so Wikipedia searches for any of them
+            const categoryFilter = filterValues.length > 0 ? filterValues.join(' OR ') : "";
+
+            // Reset UI for new generation
+            shareBtn.style.display = 'none';
+            timelineContainer.innerHTML = '';
+            
+            const birthYear = new Date(birthdateInput).getFullYear();
+            const currentYear = new Date().getFullYear();
+
+            if (birthYear > currentYear) {
+                alert("Birth year cannot be in the future!");
+                return;
+            }
+
+            loadingIndicator.style.display = 'flex';
+
+            // Memory tracker to prevent duplicate articles
+            let seenArticles = new Set();
+
+            // Fetch sequentially for streaming effect
+            for (let year = birthYear; year <= currentYear; year++) {
+                await fetchAndRenderYear(year, eventsPerYear, categoryFilter, timelineContainer, seenArticles);
+            }
+
+            loadingIndicator.style.display = 'none';
+            
+            // Show action button when done
+            if (timelineContainer.innerHTML !== '') {
+                shareBtn.style.display = 'block';
+            }
+        });
+
+        // Wikipedia API Call
+        async function fetchAndRenderYear(year, count, categoryFilter, container, seenArticles) {
+            let searchQuery = `${year}`;
+            if (categoryFilter !== "") {
+                searchQuery += ` (${categoryFilter})`;
+            }
+
+            // We fetch more items (gsrlimit=20) than needed to ensure we have backups in case of duplicates
+            const url = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(searchQuery)}&gsrlimit=20&prop=extracts|pageimages&exintro=1&exsentences=2&pithumbsize=300&format=json&origin=*`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                let pages = [];
+                if (data.query && data.query.pages) {
+                    pages = Object.values(data.query.pages);
+                }
+
+                // FILTER OUT DUPLICATES
+                pages = pages.filter(page => !seenArticles.has(page.title));
+                
+                // IF NO RESULTS (Or all results were already used)
+                if (pages.length === 0) {
+                    const emptyItem = document.createElement('div');
+                    emptyItem.className = 'timeline-item empty-year';
+                    emptyItem.innerHTML = `
+                        <div class="timeline-year">${year}</div>
+                        <h3 class="timeline-title">No related events found this year.</h3>
+                    `;
+                    container.appendChild(emptyItem);
+                    return; // Stop processing this year
+                }
+
+                // Shuffle the remaining unique events and take the requested amount
+                pages = pages.sort(() => 0.5 - Math.random());
+                const selectedEvents = pages.slice(0, count);
+
+                selectedEvents.forEach(event => {
+                    // Mark this article as seen so it's never used again
+                    seenArticles.add(event.title);
+
+                    const title = event.title;
+                    const summary = event.extract ? event.extract.replace(/<[^>]+>/g, '') : 'No summary available.';
+                    const thumbnail = event.thumbnail ? event.thumbnail.source : '';
+                    const link = `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
+
+                    const item = document.createElement('div');
+                    item.className = 'timeline-item';
+                    
+                    let imageHtml = thumbnail ? `<img src="${thumbnail}" alt="${title}" class="timeline-thumbnail" crossorigin="anonymous">` : '';
+                    
+                    item.innerHTML = `
+                        <div class="timeline-year">${year}</div>
+                        <h3 class="timeline-title">${title}</h3>
+                        <div class="timeline-content">
+                            ${imageHtml}
+                            <p class="timeline-summary">${summary}</p>
+                            <a href="${link}" target="_blank" class="explore-link">Explore on Wikipedia →</a>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                });
+
+            } catch (error) {
+                console.error(`Failed to fetch data for ${year}:`, error);
+                // Also add an empty block if the API request itself fails
+                const errorItem = document.createElement('div');
+                errorItem.className = 'timeline-item empty-year';
+                errorItem.innerHTML = `
+                    <div class="timeline-year">${year}</div>
+                    <h3 class="timeline-title">No related events found this year.</h3>
+                `;
+                container.appendChild(errorItem);
+            }
+        }
+
+        // Share API Logic
+        shareBtn.addEventListener('click', async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'My Life Timeline',
+                        text: 'Check out the timeline of my life based on Wikipedia events!',
+                        url: window.location.href 
+                    });
+                } catch (err) {
+                    console.error('Error sharing:', err);
+                }
+            } else {
+                alert('Sharing is not supported on this browser, but you can copy the URL!');
+            }
+        });
+    </script>
+</body>
+</html>
