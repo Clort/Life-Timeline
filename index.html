@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Life Timeline</title>
+    <title>Tamagotchi Release Timeline</title>
     <style>
-        /* Default to Dark Mode */
         :root {
             color-scheme: dark;
-            --primary: #4A90E2;
-            --fandom-pink: #ff5c8a; /* Added for the Fandom button */
+            --primary: #ff5c8a; /* Tamagotchi Pink */
             --bg-color: #121212;
             --text-color: #e0e0e0;
             --card-bg: #1e1e1e;
@@ -17,7 +15,6 @@
             --summary-color: #aaa;
         }
         
-        /* Light Mode Overrides */
         body.light-mode {
             color-scheme: light;
             --bg-color: #f7f9fc;
@@ -31,12 +28,9 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: background-color 0.3s, color 0.3s;
+            margin: 0; padding: 0;
+            display: flex; flex-direction: column; align-items: center;
+            transition: background-color 0.3s;
         }
 
         header {
@@ -46,14 +40,9 @@
             padding: 20px 0;
             text-align: center;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            position: relative;
         }
 
-        .container {
-            width: 90%;
-            max-width: 600px;
-            margin: 20px auto;
-        }
+        .container { width: 90%; max-width: 600px; margin: 20px auto; }
 
         .controls {
             background: var(--card-bg);
@@ -61,456 +50,152 @@
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             margin-bottom: 20px;
-            transition: background-color 0.3s;
         }
 
-        .fandom-box {
-            border: 2px dashed var(--fandom-pink);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        input[type="date"], input[type="number"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 16px;
+        input {
+            width: 100%; padding: 12px; margin-bottom: 16px;
             border: 1px solid var(--border-color);
             background-color: var(--bg-color);
             color: var(--text-color);
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 16px;
+            border-radius: 8px; box-sizing: border-box;
         }
 
         button {
-            width: 100%;
-            padding: 14px;
+            width: 100%; padding: 14px;
             background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
+            color: white; border: none; border-radius: 8px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            transition: opacity 0.3s; margin-bottom: 10px;
         }
 
-        button:hover {
-            background-color: #357abd;
-        }
-
-        .fandom-btn {
-            background-color: var(--fandom-pink);
-            margin-top: 5px;
-        }
-
-        .fandom-btn:hover {
-            background-color: #e04b76;
-        }
+        button:hover { opacity: 0.9; }
 
         .secondary-btn {
             background: transparent;
             color: var(--primary);
             border: 2px solid var(--primary);
-            margin-bottom: 16px;
         }
-        
-        .secondary-btn:hover {
-            background: rgba(74, 144, 226, 0.1);
-        }
-
-        .settings-panel {
-            display: none;
-            padding: 10px 0;
-            border-top: 1px solid var(--border-color);
-            margin-top: 10px;
-        }
-
-        /* Category Toggles */
-        .category-toggles {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .category-toggle {
-            display: inline-block;
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            padding: 8px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9em;
-            user-select: none;
-            transition: all 0.2s ease;
-            margin: 0;
-            font-weight: normal;
-        }
-
-        .category-toggle input {
-            display: none; 
-        }
-
-        .category-toggle.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .action-btn {
-            display: none;
-            margin-top: 10px;
-        }
-
-        .share-btn { background-color: #28a745; }
-        .share-btn:hover { background-color: #218838; }
 
         /* Timeline Styles */
         .timeline {
-            position: relative;
-            margin: 20px 0;
-            padding-left: 30px;
+            position: relative; margin: 20px 0; padding-left: 30px;
             border-left: 3px solid var(--primary);
         }
 
         .timeline-item {
-            position: relative;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 20px;
+            position: relative; background: var(--card-bg);
+            border-radius: 12px; padding: 16px; margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            opacity: 0;
-            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-            transition: background-color 0.3s;
+            animation: bounceIn 0.6s ease forwards;
         }
 
         .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -38px;
-            top: 20px;
-            width: 14px;
-            height: 14px;
-            background: var(--card-bg);
-            border: 3px solid var(--primary);
-            border-radius: 50%;
-            transition: background-color 0.3s;
+            content: ''; position: absolute; left: -38px; top: 20px;
+            width: 14px; height: 14px; background: var(--card-bg);
+            border: 3px solid var(--primary); border-radius: 50%;
         }
 
-        .timeline-item.empty-year {
-            opacity: 0.7;
-        }
+        .timeline-year { font-size: 0.9em; color: var(--primary); font-weight: bold; }
+        .timeline-title { font-size: 1.2em; margin: 5px 0; }
+        .timeline-summary { font-size: 0.9em; color: var(--summary-color); line-height: 1.4; }
 
-        .timeline-item.empty-year::before {
-            border-color: var(--summary-color);
-        }
-
-        .timeline-item.empty-year .timeline-title {
-            color: var(--summary-color);
-            font-size: 1.1em;
-            font-style: italic;
-            margin: 0;
-        }
-
-        .timeline-year {
-            font-size: 0.9em;
-            color: var(--primary);
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        .timeline-item.empty-year .timeline-year {
-            color: var(--summary-color);
-        }
-
-        .timeline-title {
-            font-size: 1.2em;
-            margin: 0 0 8px 0;
-        }
-
-        .timeline-content {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .timeline-thumbnail {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 8px;
-            background-color: var(--border-color);
-        }
-
-        .timeline-summary {
-            font-size: 0.95em;
-            line-height: 1.5;
-            color: var(--summary-color);
-            margin: 0;
-        }
-
-        .explore-link {
-            display: inline-block;
-            margin-top: 8px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .explore-link:hover {
-            text-decoration: underline;
-        }
-
-        /* Loading Spinner */
-        .loading-container {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            margin: 30px 0;
-            color: var(--summary-color);
-            font-style: italic;
-        }
-
+        .loading-container { display: none; flex-direction: column; align-items: center; margin: 20px; }
         .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--border-color);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
+            width: 30px; height: 30px; border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary); border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 10px;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes bounceIn {
-            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
-            70% { transform: translateY(-5px) scale(1.02); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>My Life Timeline</h1>
-    </header>
+    <header><h1>Tamagotchi History</h1></header>
 
     <div class="container">
         <div class="controls">
-            <button class="secondary-btn" id="themeToggle">☀️ Switch to Light Mode</button>
+            <button class="secondary-btn" id="themeToggle">☀️ Toggle Theme</button>
             
-            <div class="fandom-box">
-                <label for="fandomYear">Search Tamagotchi Wiki Release Year:</label>
-                <input type="number" id="fandomYear" value="1999" min="1996" max="2026">
-                <button class="fandom-btn" id="fandomSearchBtn">🔍 Search Fandom Wiki</button>
-            </div>
+            <label for="startYear">Start Year:</label>
+            <input type="number" id="startYear" value="1996" min="1996">
 
-            <label for="birthdate">When were you born?</label>
-            <input type="date" id="birthdate" required>
+            <label for="endYear">End Year:</label>
+            <input type="number" id="endYear" value="2005">
 
-            <button class="secondary-btn" id="toggleSettings">⚙️ Settings & Filters</button>
-            
-            <div class="settings-panel" id="settingsPanel">
-                <label>Wikipedia Topic Filters (Timeline Mode):</label>
-                <div class="category-toggles" id="categoryToggles">
-                    <label class="category-toggle"><input type="checkbox" value='"tamagotchi"'>Tamagotchi</label>
-                    <label class="category-toggle"><input type="checkbox" value='"space flight"'>Space</label>
-                </div>
-
-                <label for="eventsPerYear">Events per year:</label>
-                <input type="number" id="eventsPerYear" value="1" min="1" max="5">
-            </div>
-
-            <button id="generateBtn">Generate Wikipedia Timeline</button>
-            <button id="shareBtn" class="action-btn share-btn">📤 Share Timeline</button>
+            <button id="generateFandomBtn">Generate Tamagotchi Timeline</button>
         </div>
 
         <div class="loading-container" id="loadingIndicator">
             <div class="spinner"></div>
-            <span>Searching the Wikipedia archives...</span>
+            <p>Scanning Fandom Database...</p>
         </div>
         
         <div class="timeline" id="timeline"></div>
     </div>
 
     <script>
-        const shareBtn = document.getElementById('shareBtn');
         const timelineContainer = document.getElementById('timeline');
-        const themeToggle = document.getElementById('themeToggle');
+        const loadingIndicator = document.getElementById('loadingIndicator');
 
-        // Logic for the NEW Fandom Search Button
-        document.getElementById('fandomSearchBtn').addEventListener('click', () => {
-            const year = document.getElementById('fandomYear').value;
-            // This crafts the query we discussed earlier
-            const query = `"${year}" "Release Date"`;
-            const searchUrl = `https://tamagotchi.fandom.com/wiki/Special:Search?query=${encodeURIComponent(query)}&scope=internal`;
-            window.open(searchUrl, '_blank');
-        });
-
-        // Theme Toggle Logic
-        themeToggle.addEventListener('click', () => {
+        // Theme Toggle
+        document.getElementById('themeToggle').addEventListener('click', () => {
             document.body.classList.toggle('light-mode');
-            if (document.body.classList.contains('light-mode')) {
-                themeToggle.innerText = '🌙 Switch to Dark Mode';
-            } else {
-                themeToggle.innerText = '☀️ Switch to Light Mode';
-            }
         });
 
-        // Toggle Settings Panel
-        document.getElementById('toggleSettings').addEventListener('click', () => {
-            const panel = document.getElementById('settingsPanel');
-            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
-        });
-
-        // Category Toggle UI Logic
-        document.querySelectorAll('.category-toggle input').forEach(input => {
-            input.addEventListener('change', function() {
-                if (this.checked) {
-                    this.parentElement.classList.add('active');
-                } else {
-                    this.parentElement.classList.remove('active');
-                }
-            });
-        });
-
-        // Generate Timeline Logic
-        document.getElementById('generateBtn').addEventListener('click', async () => {
-            const birthdateInput = document.getElementById('birthdate').value;
-            const eventsPerYear = parseInt(document.getElementById('eventsPerYear').value) || 1;
-            const loadingIndicator = document.getElementById('loadingIndicator');
-
-            if (!birthdateInput) {
-                alert("Please enter a valid birthdate.");
-                return;
-            }
-
-            const checkedBoxes = Array.from(document.querySelectorAll('.category-toggle input:checked'));
-            const filterValues = checkedBoxes.map(cb => cb.value);
-            const categoryFilter = filterValues.length > 0 ? filterValues.join(' OR ') : "";
-
-            shareBtn.style.display = 'none';
-            timelineContainer.innerHTML = '';
+        // Main Generation Logic
+        document.getElementById('generateFandomBtn').addEventListener('click', async () => {
+            const startYear = parseInt(document.getElementById('startYear').value);
+            const endYear = parseInt(document.getElementById('endYear').value);
             
-            const birthYear = new Date(birthdateInput).getFullYear();
-            const currentYear = new Date().getFullYear();
-
-            if (birthYear > currentYear) {
-                alert("Birth year cannot be in the future!");
-                return;
-            }
-
+            timelineContainer.innerHTML = '';
             loadingIndicator.style.display = 'flex';
-            let seenArticles = new Set();
 
-            for (let year = birthYear; year <= currentYear; year++) {
-                await fetchAndRenderYear(year, eventsPerYear, categoryFilter, timelineContainer, seenArticles);
+            for (let year = startYear; year <= endYear; year++) {
+                await fetchFandomYear(year);
             }
 
             loadingIndicator.style.display = 'none';
-            if (timelineContainer.innerHTML !== '') {
-                shareBtn.style.display = 'block';
-            }
         });
 
-        // Wikipedia API Call
-        async function fetchAndRenderYear(year, count, categoryFilter, container, seenArticles) {
-            let searchQuery = `${year}`;
-            if (categoryFilter !== "") {
-                // This combines the year with your selected topics
-                searchQuery += ` (${categoryFilter})`;
-            }
+        async function fetchFandomYear(year) {
+            // Search query looking specifically for "Release Date" and the Year
+            const query = `"${year}" "Release Date"`;
+            const url = `https://tamagotchi.fandom.com/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query)}&gsrlimit=3&prop=extracts|info&exintro=1&exsentences=2&inprop=url&format=json&origin=*`;
 
-            const url = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(searchQuery)}&gsrlimit=20&prop=extracts|pageimages&exintro=1&exsentences=2&pithumbsize=300&format=json&origin=*`;
-            
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                let pages = [];
                 if (data.query && data.query.pages) {
-                    pages = Object.values(data.query.pages);
-                }
-
-                pages = pages.filter(page => !seenArticles.has(page.title));
-                
-                if (pages.length === 0) {
-                    const emptyItem = document.createElement('div');
-                    emptyItem.className = 'timeline-item empty-year';
-                    emptyItem.innerHTML = `
-                        <div class="timeline-year">${year}</div>
-                        <h3 class="timeline-title">No related events found this year.</h3>
-                    `;
-                    container.appendChild(emptyItem);
-                    return;
-                }
-
-                pages = pages.sort(() => 0.5 - Math.random());
-                const selectedEvents = pages.slice(0, count);
-
-                selectedEvents.forEach(event => {
-                    seenArticles.add(event.title);
-                    const title = event.title;
-                    const summary = event.extract ? event.extract.replace(/<[^>]+>/g, '') : 'No summary available.';
-                    const thumbnail = event.thumbnail ? event.thumbnail.source : '';
-                    const link = `https://en.wikipedia.org/wiki/${encodeURIComponent(title)}`;
-
-                    const item = document.createElement('div');
-                    item.className = 'timeline-item';
-                    let imageHtml = thumbnail ? `<img src="${thumbnail}" alt="${title}" class="timeline-thumbnail" crossorigin="anonymous">` : '';
+                    const pages = Object.values(data.query.pages);
                     
-                    item.innerHTML = `
-                        <div class="timeline-year">${year}</div>
-                        <h3 class="timeline-title">${title}</h3>
-                        <div class="timeline-content">
-                            ${imageHtml}
-                            <p class="timeline-summary">${summary}</p>
-                            <a href="${link}" target="_blank" class="explore-link">Explore on Wikipedia →</a>
-                        </div>
-                    `;
-                    container.appendChild(item);
-                });
-
+                    pages.forEach(page => {
+                        const item = document.createElement('div');
+                        item.className = 'timeline-item';
+                        
+                        // Clean up the extract (Fandom often returns HTML tags)
+                        const cleanSummary = page.extract ? page.extract.replace(/<[^>]+>/g, '') : 'Device details available on wiki.';
+                        
+                        item.innerHTML = `
+                            <div class="timeline-year">${year}</div>
+                            <h3 class="timeline-title">${page.title}</h3>
+                            <p class="timeline-summary">${cleanSummary}</p>
+                            <a href="${page.fullurl}" target="_blank" style="color:var(--primary); text-decoration:none; font-size:0.8em;">View on Fandom Wiki →</a>
+                        `;
+                        timelineContainer.appendChild(item);
+                    });
+                }
             } catch (error) {
-                console.error(`Failed to fetch data for ${year}:`, error);
-                const errorItem = document.createElement('div');
-                errorItem.className = 'timeline-item empty-year';
-                errorItem.innerHTML = `
-                    <div class="timeline-year">${year}</div>
-                    <h3 class="timeline-title">No related events found this year.</h3>
-                `;
-                container.appendChild(errorItem);
+                console.error("Fandom Fetch Error:", error);
             }
         }
-
-        shareBtn.addEventListener('click', async () => {
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: 'My Life Timeline',
-                        text: 'Check out the timeline of my life based on Wikipedia events!',
-                        url: window.location.href 
-                    });
-                } catch (err) {
-                    console.error('Error sharing:', err);
-                }
-            } else {
-                alert('Sharing is not supported on this browser!');
-            }
-        });
     </script>
 </body>
 </html>
