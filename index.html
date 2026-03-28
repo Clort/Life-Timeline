@@ -9,6 +9,7 @@
         :root {
             color-scheme: dark;
             --primary: #4A90E2;
+            --fandom-pink: #ff5c8a; /* Added for the Fandom button */
             --bg-color: #121212;
             --text-color: #e0e0e0;
             --card-bg: #1e1e1e;
@@ -63,6 +64,13 @@
             transition: background-color 0.3s;
         }
 
+        .fandom-box {
+            border: 2px dashed var(--fandom-pink);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
         label {
             display: block;
             margin-bottom: 8px;
@@ -96,6 +104,15 @@
 
         button:hover {
             background-color: #357abd;
+        }
+
+        .fandom-btn {
+            background-color: var(--fandom-pink);
+            margin-top: 5px;
+        }
+
+        .fandom-btn:hover {
+            background-color: #e04b76;
         }
 
         .secondary-btn {
@@ -295,22 +312,29 @@
         <div class="controls">
             <button class="secondary-btn" id="themeToggle">☀️ Switch to Light Mode</button>
             
+            <div class="fandom-box">
+                <label for="fandomYear">Search Tamagotchi Wiki Release Year:</label>
+                <input type="number" id="fandomYear" value="1999" min="1996" max="2026">
+                <button class="fandom-btn" id="fandomSearchBtn">🔍 Search Fandom Wiki</button>
+            </div>
+
             <label for="birthdate">When were you born?</label>
             <input type="date" id="birthdate" required>
 
             <button class="secondary-btn" id="toggleSettings">⚙️ Settings & Filters</button>
             
             <div class="settings-panel" id="settingsPanel">
-                <label>Filter by Topics (Select multiple):</label>
+                <label>Wikipedia Topic Filters (Timeline Mode):</label>
                 <div class="category-toggles" id="categoryToggles">
-                    <label class="category-toggle"><input type="checkbox" value='intitle:1999 "tamagotchi"'>Tamagotchi</label>
+                    <label class="category-toggle"><input type="checkbox" value='"tamagotchi"'>Tamagotchi</label>
+                    <label class="category-toggle"><input type="checkbox" value='"space flight"'>Space</label>
                 </div>
 
                 <label for="eventsPerYear">Events per year:</label>
                 <input type="number" id="eventsPerYear" value="1" min="1" max="5">
             </div>
 
-            <button id="generateBtn">Generate Timeline</button>
+            <button id="generateBtn">Generate Wikipedia Timeline</button>
             <button id="shareBtn" class="action-btn share-btn">📤 Share Timeline</button>
         </div>
 
@@ -326,6 +350,15 @@
         const shareBtn = document.getElementById('shareBtn');
         const timelineContainer = document.getElementById('timeline');
         const themeToggle = document.getElementById('themeToggle');
+
+        // Logic for the NEW Fandom Search Button
+        document.getElementById('fandomSearchBtn').addEventListener('click', () => {
+            const year = document.getElementById('fandomYear').value;
+            // This crafts the query we discussed earlier
+            const query = `"${year}" "Release Date"`;
+            const searchUrl = `https://tamagotchi.fandom.com/wiki/Special:Search?query=${encodeURIComponent(query)}&scope=internal`;
+            window.open(searchUrl, '_blank');
+        });
 
         // Theme Toggle Logic
         themeToggle.addEventListener('click', () => {
@@ -365,13 +398,10 @@
                 return;
             }
 
-            // Gather all checked category filters
             const checkedBoxes = Array.from(document.querySelectorAll('.category-toggle input:checked'));
             const filterValues = checkedBoxes.map(cb => cb.value);
-            // Combine them with OR (e.g., "Toys OR Space") so Wikipedia searches for any of them
             const categoryFilter = filterValues.length > 0 ? filterValues.join(' OR ') : "";
 
-            // Reset UI for new generation
             shareBtn.style.display = 'none';
             timelineContainer.innerHTML = '';
             
@@ -384,18 +414,13 @@
             }
 
             loadingIndicator.style.display = 'flex';
-
-            // Memory tracker to prevent duplicate articles
             let seenArticles = new Set();
 
-            // Fetch sequentially for streaming effect
             for (let year = birthYear; year <= currentYear; year++) {
                 await fetchAndRenderYear(year, eventsPerYear, categoryFilter, timelineContainer, seenArticles);
             }
 
             loadingIndicator.style.display = 'none';
-            
-            // Show action button when done
             if (timelineContainer.innerHTML !== '') {
                 shareBtn.style.display = 'block';
             }
@@ -405,10 +430,10 @@
         async function fetchAndRenderYear(year, count, categoryFilter, container, seenArticles) {
             let searchQuery = `${year}`;
             if (categoryFilter !== "") {
+                // This combines the year with your selected topics
                 searchQuery += ` (${categoryFilter})`;
             }
 
-            // We fetch more items (gsrlimit=20) than needed to ensure we have backups in case of duplicates
             const url = `https://en.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(searchQuery)}&gsrlimit=20&prop=extracts|pageimages&exintro=1&exsentences=2&pithumbsize=300&format=json&origin=*`;
             
             try {
@@ -420,10 +445,8 @@
                     pages = Object.values(data.query.pages);
                 }
 
-                // FILTER OUT DUPLICATES
                 pages = pages.filter(page => !seenArticles.has(page.title));
                 
-                // IF NO RESULTS (Or all results were already used)
                 if (pages.length === 0) {
                     const emptyItem = document.createElement('div');
                     emptyItem.className = 'timeline-item empty-year';
@@ -432,17 +455,14 @@
                         <h3 class="timeline-title">No related events found this year.</h3>
                     `;
                     container.appendChild(emptyItem);
-                    return; // Stop processing this year
+                    return;
                 }
 
-                // Shuffle the remaining unique events and take the requested amount
                 pages = pages.sort(() => 0.5 - Math.random());
                 const selectedEvents = pages.slice(0, count);
 
                 selectedEvents.forEach(event => {
-                    // Mark this article as seen so it's never used again
                     seenArticles.add(event.title);
-
                     const title = event.title;
                     const summary = event.extract ? event.extract.replace(/<[^>]+>/g, '') : 'No summary available.';
                     const thumbnail = event.thumbnail ? event.thumbnail.source : '';
@@ -450,7 +470,6 @@
 
                     const item = document.createElement('div');
                     item.className = 'timeline-item';
-                    
                     let imageHtml = thumbnail ? `<img src="${thumbnail}" alt="${title}" class="timeline-thumbnail" crossorigin="anonymous">` : '';
                     
                     item.innerHTML = `
@@ -467,7 +486,6 @@
 
             } catch (error) {
                 console.error(`Failed to fetch data for ${year}:`, error);
-                // Also add an empty block if the API request itself fails
                 const errorItem = document.createElement('div');
                 errorItem.className = 'timeline-item empty-year';
                 errorItem.innerHTML = `
@@ -478,7 +496,6 @@
             }
         }
 
-        // Share API Logic
         shareBtn.addEventListener('click', async () => {
             if (navigator.share) {
                 try {
@@ -491,7 +508,7 @@
                     console.error('Error sharing:', err);
                 }
             } else {
-                alert('Sharing is not supported on this browser, but you can copy the URL!');
+                alert('Sharing is not supported on this browser!');
             }
         });
     </script>
